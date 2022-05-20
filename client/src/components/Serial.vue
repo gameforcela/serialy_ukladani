@@ -11,20 +11,20 @@ export  default {
     id: Number,
     title: String,
     image: String,
-    series: [String],
+    series: [Object],
     episodes: [Object],
   }
 }
 </script>
 
 <template>
+  <p class="text-light">ahoj 2</p>
   <div class="card col-12 bg-dark">
     <div class="row">
 
       <div class="col-4">
         <img :src="image" class="card-img rounded mx-auto d-block img-fluid col-5 float-start">
       </div>
-
       <div class="col-8">
 
         <div class="card-title text-light">
@@ -62,6 +62,7 @@ export  default {
       </div>
 
       <RouterLink class="btn bg-light text-dark m-2" to="/serial">Detail serialu/Upravit serial</RouterLink>
+
     </div>
   </div>
 </template>

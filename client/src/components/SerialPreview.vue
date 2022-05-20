@@ -11,7 +11,7 @@ export default {
     id: Number,
     title: String,
     image: String,
-    series: [String],
+    series: [Object],
     episodes: [Object],
   },
 }
@@ -30,21 +30,28 @@ export default {
             </div>
 
             <div class="card-body">
+
               <select class="form-select" aria-label="Default select example" v-model="usedSerie">
 
-                  <option v-for="(serie,key) in series" :key="key" :value="key+1"> {{ serie }} </option>
+                  <option v-for="(serie,key) in series" :key="key" :value="serie.IdSeason"> {{ serie.NameSeason }} </option>
 
               </select>
 
+
               <ul class="list-group overflow-scroll " style="height: 20rem;">
-              <template v-for="episodeX in episodes">
-                  <li v-if="episodeX.serie == usedSerie" class="list-group-item "> {{ episodeX.serie }}x{{ episodeX.episoda }} - {{ episodeX.name }} </li>
+              <template v-for="serie in series">
+                <div v-for="episodeX in serie.episodes">
+                  <li v-if="episodeX.Season == usedSerie" class="list-group-item "> {{ episodeX.Season }}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
+
+                </div>
               </template>
               </ul>
+
             </div>
+
           </div>
 
-          <RouterLink class="btn bg-light text-dark" to="/serial">Detail serialu/Upravit serial</RouterLink>
+          <RouterLink class="btn bg-light text-dark" :to="`/serial/${id}`">Detail serialu/Upravit serial</RouterLink>
         </div>
       </div>
 
