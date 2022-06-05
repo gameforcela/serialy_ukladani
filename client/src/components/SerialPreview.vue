@@ -11,8 +11,7 @@ export default {
     id: Number,
     title: String,
     image: String,
-    series: [Object],
-    episodes: [Object],
+    series: [Object]
   },
 }
 </script>
@@ -26,7 +25,7 @@ export default {
           </div>
           <div class="col-8">
             <div class="card-title">
-              <h3>{{ title }}</h3>
+              <h3>{{id}}. {{title }}</h3>
             </div>
 
             <div class="card-body">

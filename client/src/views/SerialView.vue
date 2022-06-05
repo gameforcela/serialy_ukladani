@@ -18,10 +18,8 @@ export default {
 </script>
 
 <template>
-  <p class="text-light">ahoj</p>
-
     <div class="row">
-    <Serial :title="serial.NameSerial" :image="serial.Image" :series="serial.seasons" :episodes="serial.episodes" ></Serial>
+    <Serial :id="serial.IdSerial" :title="serial.NameSerial" :image="serial.Image" :series="serial.seasons"></Serial>
     <RouterLink class="btn bg-dark text-light m-2" to="/">Zpět</RouterLink>
     </div>
 

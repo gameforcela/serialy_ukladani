@@ -1,41 +1,92 @@
 <script>
-export  default {
+export default {
   name: "Serial",
   data() {
     return {
       usedSerie: 1,
-      newSeason: false
+      newSeason: false,
+      newEpisode: false,
+      season:{
+        NameSeason: null,
+        Serial: null,
+        NumberSeason: null
+      },
+      episode:{
+        Season: null,
+        NumberEpisode: null,
+        NameEpisode: null
+      },
+      serial: []
     }
   },
-  props: {
-    id: Number,
-    title: String,
-    image: String,
-    series: [Object],
-    episodes: [Object],
+  async created() {
+    const res = await fetch(`http://localhost:8000/serials/${this.$route.params.id}`,{method: 'GET'});
+    this.serial = await res.json();
+    console.log(this.serial);
+  },
+  methods: {
+    async sendSeason() {
+      try {
+        this.season.Serial = this.serial.IdSerial;
+        console.log(this.season);
+        await fetch('http://localhost:8000/serials/season',
+            {
+              method: 'POST',
+              body: JSON.stringify(this.season),
+              headers:{
+                'Content-type':'application/json'
+              }
+            }
+        )
+        alert("Saved!");
+      } catch (e) {
+        alert(e);
+      }
+    },
+    async sendEpisode() {
+      try {
+        this.episode.Season = this.serial.IdSerial;
+        console.log(this.episode);
+        await fetch('http://localhost:8000/serials/episode',
+            {
+              method: 'POST',
+              body: JSON.stringify(this.episode),
+              headers:{
+                'Content-type':'application/json'
+              }
+            }
+        )
+        alert("Saved!");
+      } catch (e) {
+        alert(e);
+      }
+    }
   }
+
+
 }
 </script>
 
 <template>
-  <p class="text-light">ahoj 2</p>
+
   <div class="card col-12 bg-dark">
     <div class="row">
 
       <div class="col-4">
-        <img :src="image" class="card-img rounded mx-auto d-block img-fluid col-5 float-start">
+        <img :src="serial.Image" class="card-img rounded mx-auto d-block img-fluid col-5 float-start">
       </div>
       <div class="col-8">
 
         <div class="card-title text-light">
-          <h3>{{ title }}</h3>
+          <h3>{{serial.IdSerial}}. {{ serial.NameSerial }}</h3>
         </div>
 
 
         <div v-if="newSeason==true" class="row">
-          <label class="form-label col-2 text-light" >Nová serie: </label>
-          <input type="text" class="col-4" placeholder="Title"/>
-          <button class="col-1 btn btn-dark"><i class="bi bi-check text-success btn-lg"></i></button>
+          <label class="form-label col-2 text-center text-light" >Nová serie: </label>
+          <input type="text" v-model="season.NameSeason" class="col-3" placeholder="Název serie"/>
+          <input type="number" v-model="season.NumberSeason" class="col-1" placeholder="Číslo serie"/>
+          <button class="col-1 btn btn-dark" @click="sendSeason" v-on:click="newSeason=false"><i class="bi bi-check text-success btn-lg"></i></button>
           <button v-on:click="newSeason=false" class="col-1 btn btn-dark text-light"><i class="bi bi-x text-danger btn-lg"></i></button>
         </div>
 
@@ -45,25 +96,38 @@ export  default {
             <div v-if="newSeason==false">
               <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-plus-square"></i></button>
             </div>
-          <select class="form-select" aria-label="Default select example" v-model="usedSerie">
-            <option v-for="(serie,key) in series" :key="key" :value="key+1"> {{ serie }} </option>
-          </select>
+            <select class="form-select" aria-label="Default select example" v-model="usedSerie">
+              <option v-for="serie in serial.seasons" :value="serie.NumberSeason"> {{ serie.NameSeason }} </option>
+
+            </select>
             <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-pencil"></i></button>
             <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-trash"></i></button>
           </div>
 
-          <template v-for="episodeX in episodes" >
-            <p v-if="episodeX.serie == usedSerie" class="text-light m-2"> {{ episodeX.serie }}x{{ episodeX.episoda }} - {{ episodeX.name }} </p>
-            <button v-if="episodeX.serie == usedSerie" type="button"  v-on:click="newSeason=true"><i class="bi bi-pencil "></i></button>
-            <button v-if="episodeX.serie == usedSerie" type="button"  v-on:click="newSeason=true"><i class="bi bi-trash"></i></button>
-          </template>
+          <ul class="list-group overflow-scroll " style="height: 20rem;">
+            <template v-for="serie in serial.seasons">
+              <div v-for="episodeX in serie.episodes">
+                <div v-if="episodeX.Season == usedSerie"  class="input-group">
+                <li class="list-group-item "> {{ episodeX.Season }}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
+                  <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-trash"></i></button>
+                </div>
+              </div>
+            </template>
+          </ul>
         </div>
-        <button type="button" class="m-2 p-0 row float-start text-light btn btn-dark "><i class="bi bi-plus-square"></i>Přidat epizodu</button>
+        <div v-if="newEpisode==false">
+          <button type="button" class="m-2 p-0 row float-start text-light btn btn-dark" v-on:click="newEpisode=true"><i class="bi bi-plus-square"></i>Přidat epizodu</button>
+        </div>
+        <div v-if="newEpisode==true" class="row">
+          <label class="form-label col-2 text-center text-light" >Nová episoda: </label>
+          <input type="text" v-model="episode.NameEpisode" class="col-3" placeholder="Název epizody"/>
+          <input type="number" v-model="episode.NumberEpisode" class="col-1" placeholder="Číslo epizody"/>
+          <button class="col-1 btn btn-dark" @click="sendSeason" v-on:click="newEpisode=false"><i class="bi bi-check text-success btn-lg"></i></button>
+          <button v-on:click="newEpisode=false" class="col-1 btn btn-dark text-light"><i class="bi bi-x text-danger btn-lg"></i></button>
+        </div>
       </div>
-
-      <RouterLink class="btn bg-light text-dark m-2" to="/serial">Detail serialu/Upravit serial</RouterLink>
-
     </div>
   </div>
+  <RouterLink class="btn bg-dark text-light m-2" to="/">Zpět</RouterLink>
 </template>
 

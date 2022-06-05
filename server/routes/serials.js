@@ -1,4 +1,5 @@
 var express = require('express');
+const {contentDisposition} = require("express/lib/utils");
 var router = express.Router();
 var debug = require('debug')('router:serials');
 
@@ -14,7 +15,6 @@ router.get("/", function (req, res, next) {
 
 		for(let season of serial.seasons){
 			season.episodes = db.prepare(`SELECT * FROM Episode WHERE Episode.Season = ${season.IdSeason}`).all();
-
 		}
 	}
 	res.send(serials);
@@ -35,19 +35,43 @@ router.get('/:id', (req, res, next) => {
 });
 
 
-router.post("/", (req, res) => {
-	const body = req.body;
-	console.log(body);
-	const article = {
-		image: body.image,
-		title: body.title,
-		date: new Date().toISOString(),
-		text: body.text
-	}
+router.post("/serial", (req, res, next) => {
 
-	const stm = db.prepare("INSERT INTO article (image, title, date, text) VALUES (?,?,?,?)");
-	stm.run(...Object.values(article))
-	res.send(article);
+	const body = req.body;
+	const name = body.NameSerial;
+	const image = body.Image;
+
+
+	const insert = db.prepare('INSERT INTO Serial (NameSerial, Image) VALUES (?, ?)');
+	insert.run(name, image);
+	res.send({});
+});
+
+router.post("/season", (req, res, next) => {
+
+	const body = req.body;
+	const name = body.NameSeason;
+	const serial = body.Serial;
+	const number = body.NumberSeason;
+
+
+	const insert = db.prepare('INSERT INTO Season (NameSeason, Serial, NumberSeason) VALUES (?, ?, ?)');
+	insert.run(name, serial, number);
+	res.send({});
+});
+
+
+router.post("/episode", (req, res, next) => {
+
+	const body = req.body;
+	const season = body.Season;
+	const number = body.NumberEpisode;
+	const name = body.NameEpisode;
+
+
+	const insert = db.prepare('INSERT INTO Episode (Season, NumberEpisode, NameEpisode) VALUES (?, ?, ?)');
+	insert.run(season, number, name);
+	res.send({});
 });
 
 /*

@@ -22,9 +22,9 @@ export default {
     <div class="text-light container-fluid" >
       <div class="row">
         <template v-for="serial in serials">
-
         <div class="col-6">
-          <SerialPreview :id="serial.IdSerial" :title="serial.NameSerial" :image="serial.Image" :series="serial.seasons" :episodes="serial.seasons.episodes"></SerialPreview>
+          <SerialPreview :id="serial.IdSerial" :title="serial.NameSerial" :image="serial.Image" :series="serial.seasons"></SerialPreview>
+
         </div>
         </template>
       </div>
