@@ -3,7 +3,7 @@ export default {
   name: "SerialPreview",
   data() {
     return {
-      usedSerie: 1,
+      usedSerie: [],
       newSeason: false
     }
   },
@@ -32,7 +32,7 @@ export default {
 
               <select class="form-select" aria-label="Default select example" v-model="usedSerie">
 
-                  <option v-for="(serie,key) in series" :key="key" :value="serie.IdSeason"> {{ serie.NameSeason }} </option>
+                  <option v-for="(serie,key) in series" :key="key" :value="serie"> {{ serie.NameSeason }} </option>
 
               </select>
 
@@ -40,7 +40,7 @@ export default {
               <ul class="list-group overflow-scroll " style="height: 20rem;">
               <template v-for="serie in series">
                 <div v-for="episodeX in serie.episodes">
-                  <li v-if="episodeX.Season == usedSerie" class="list-group-item "> {{ episodeX.Season }}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
+                  <li v-if="episodeX.Season == usedSerie.IdSeason" class="list-group-item "> {{ usedSerie.NumberSeason }}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
 
                 </div>
               </template>

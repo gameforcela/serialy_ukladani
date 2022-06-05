@@ -74,6 +74,48 @@ router.post("/episode", (req, res, next) => {
 	res.send({});
 });
 
+router.delete('/episode/:id', (req, res, next) => {
+	const id = req.params.id
+	if (id) {
+		const delete_episode = db.prepare('DELETE FROM Episode WHERE Episode.IdEpisode = ?');
+		delete_episode.run(id);
+		res.sendStatus(200);
+	}
+	else{
+		res.sendStatus(404);
+	}
+});
+
+router.delete('/season/:id', (req, res, next) => {
+	const id = req.params.id
+	if (id) {
+		const delete_episodes = db.prepare('DELETE FROM Episode WHERE Episode.Season = ?');
+		delete_episodes.run(id);
+		const delete_season = db.prepare('DELETE FROM Season WHERE Season.IdSeason = ?');
+		delete_season.run(id);
+		res.sendStatus(200);
+	}
+	else{
+		res.sendStatus(404);
+	}
+});
+
+router.delete('/serial/:id', (req, res, next) => {
+	const id = req.params.id
+	if (id) {
+		const delete_episodes = db.prepare('DELETE FROM Episode WHERE IdEpisode IN (SELECT e.IdEpisode FROM Episode e INNER JOIN Season s ON e.Season=s.IdSeason WHERE s.Serial =?)');
+		delete_episodes.run(id);
+		const delete_season = db.prepare('DELETE FROM Season WHERE Season.Serial = ?');
+		delete_season.run(id);
+		const delete_serial = db.prepare('DELETE FROM Serial WHERE Serial.IdSerial = ?');
+		delete_serial.run(id);
+		res.sendStatus(200);
+	}
+	else{
+		res.sendStatus(404);
+	}
+});
+
 /*
 router.patch("/:id", (req, res) => {
 	const body = req.body;

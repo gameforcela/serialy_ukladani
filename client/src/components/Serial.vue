@@ -3,7 +3,7 @@ export default {
   name: "Serial",
   data() {
     return {
-      usedSerie: 1,
+      usedSerie: [],
       newSeason: false,
       newEpisode: false,
       season:{
@@ -20,11 +20,44 @@ export default {
     }
   },
   async created() {
-    const res = await fetch(`http://localhost:8000/serials/${this.$route.params.id}`,{method: 'GET'});
-    this.serial = await res.json();
-    console.log(this.serial);
+    await this.resetData();
   },
   methods: {
+    async deleteEpisode(episodeToDelete){
+      try{
+        const res = await fetch(`http://localhost:8000/serials/episode/${episodeToDelete}`,{method: 'DELETE'});
+        console.log(res);
+        alert("Deleted!")
+      }catch (e){
+        alert(e)
+      }
+      await this.resetData();
+    },
+    async deleteSeason(seasonToDelete){
+      try{
+      const res = await fetch(`http://localhost:8000/serials/season/${seasonToDelete}`,{method: 'DELETE'});
+      console.log(res);
+      alert("Deleted!")
+    }catch (e){
+      alert(e)
+    }
+    await this.resetData();
+    },
+    async deleteSerial(serialToDelete){
+      try{
+        const res = await fetch(`http://localhost:8000/serials/serial/${serialToDelete}`,{method: 'DELETE'});
+        console.log(res);
+        alert("Deleted!")
+      }catch (e){
+        alert(e)
+      }
+      await this.resetData();
+    },
+    async resetData(){
+      const res = await fetch(`http://localhost:8000/serials/${this.$route.params.id}`,{method: 'GET'});
+      this.serial = await res.json();
+      console.log(this.serial);
+    },
     async sendSeason() {
       try {
         this.season.Serial = this.serial.IdSerial;
@@ -42,10 +75,11 @@ export default {
       } catch (e) {
         alert(e);
       }
+      await this.resetData();
     },
     async sendEpisode() {
       try {
-        this.episode.Season = this.serial.IdSerial;
+        this.episode.Season = this.usedSerie.IdSeason;
         console.log(this.episode);
         await fetch('http://localhost:8000/serials/episode',
             {
@@ -60,6 +94,7 @@ export default {
       } catch (e) {
         alert(e);
       }
+      await this.resetData();
     }
   }
 
@@ -79,6 +114,7 @@ export default {
 
         <div class="card-title text-light">
           <h3>{{serial.IdSerial}}. {{ serial.NameSerial }}</h3>
+          <button type="button" class="input-group-text btn btn-light text-dark " @click="deleteSerial(serial.IdSerial)"><i class="bi bi-trash"></i></button>
         </div>
 
 
@@ -97,19 +133,19 @@ export default {
               <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-plus-square"></i></button>
             </div>
             <select class="form-select" aria-label="Default select example" v-model="usedSerie">
-              <option v-for="serie in serial.seasons" :value="serie.NumberSeason"> {{ serie.NameSeason }} </option>
+              <option v-for="serie in serial.seasons" :value="serie"> {{ serie.NameSeason }} </option>
 
             </select>
             <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-pencil"></i></button>
-            <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-trash"></i></button>
+            <button type="button" class="input-group-text btn btn-light text-dark " @click="deleteSeason(usedSerie.IdSeason)"><i class="bi bi-trash"></i></button>
           </div>
 
           <ul class="list-group overflow-scroll " style="height: 20rem;">
             <template v-for="serie in serial.seasons">
               <div v-for="episodeX in serie.episodes">
-                <div v-if="episodeX.Season == usedSerie"  class="input-group">
-                <li class="list-group-item "> {{ episodeX.Season }}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
-                  <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-trash"></i></button>
+                <div v-if="episodeX.Season == usedSerie.IdSeason"  class="input-group">
+                <li class="list-group-item "> {{usedSerie.NumberSeason}}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
+                  <button type="button" class="input-group-text btn btn-light text-dark " @click="deleteEpisode(episodeX.IdEpisode)"><i class="bi bi-trash"></i></button>
                 </div>
               </div>
             </template>
@@ -122,12 +158,15 @@ export default {
           <label class="form-label col-2 text-center text-light" >Nová episoda: </label>
           <input type="text" v-model="episode.NameEpisode" class="col-3" placeholder="Název epizody"/>
           <input type="number" v-model="episode.NumberEpisode" class="col-1" placeholder="Číslo epizody"/>
-          <button class="col-1 btn btn-dark" @click="sendSeason" v-on:click="newEpisode=false"><i class="bi bi-check text-success btn-lg"></i></button>
+          <button class="col-1 btn btn-dark" @click="sendEpisode" v-on:click="newEpisode=false"><i class="bi bi-check text-success btn-lg"></i></button>
           <button v-on:click="newEpisode=false" class="col-1 btn btn-dark text-light"><i class="bi bi-x text-danger btn-lg"></i></button>
         </div>
+
+
       </div>
+      <RouterLink class="btn btn-dark text-light m-2" to="/">Zpět</RouterLink>
     </div>
   </div>
-  <RouterLink class="btn bg-dark text-light m-2" to="/">Zpět</RouterLink>
+
 </template>
 
