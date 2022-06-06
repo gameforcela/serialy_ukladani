@@ -116,6 +116,26 @@ router.delete('/serial/:id', (req, res, next) => {
 	}
 });
 
+router.patch('/serial/:id', (req, res, next) => {
+	const body = req.body;
+	const id = req.params.id
+	console.debug(req.params);
+	if (id) {
+		const serial = db.prepare('SELECT * FROM Serial WHERE Serial.IdSerial = ?').get(id);
+		if(serial){
+			Object.assign(serial, body);
+			const stm = db.prepare('UPDATE Serial SET NameSerial = ?, Image =? WHERE Serial.IdSerial = ?');
+			const info = stm.run(serial.NameSerial, serial.Image, serial.IdSerial);
+			res.sendStatus(200);
+		}
+		else{
+			res.sendStatus(404);
+		}
+	} else {
+		res.sendStatus(404);
+	}
+});
+
 /*
 router.patch("/:id", (req, res) => {
 	const body = req.body;

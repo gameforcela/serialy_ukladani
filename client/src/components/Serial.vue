@@ -6,6 +6,11 @@ export default {
       usedSerie: [],
       newSeason: false,
       newEpisode: false,
+      editSerial: false,
+      serialPatch: {
+        NameSerial: null,
+        Image: null,
+      },
       season:{
         NameSeason: null,
         Serial: null,
@@ -23,6 +28,30 @@ export default {
     await this.resetData();
   },
   methods: {
+    async patchSerial(serialToPatch){
+      try{
+        if(this.serialPatch.NameSerial == null){
+          this.serialPatch.NameSerial = this.serial.NameSerial;
+        }
+        if(this.serialPatch.Image == null){
+          this.serialPatch.Image = this.serial.Image;
+        }
+        console.log(this.serialPatch);
+        const res = await fetch(`http://localhost:8000/serials/serial/${serialToPatch}`,
+            {method: 'PATCH',
+                body: JSON.stringify(this.serialPatch),
+                headers:{
+                'Content-type':'application/json'
+                }
+               });
+        console.log(res);
+        alert("Edited!")
+      }catch (e){
+        alert(e)
+      }
+      this.editSerial=false;
+      await this.resetData();
+    },
     async deleteEpisode(episodeToDelete){
       try{
         const res = await fetch(`http://localhost:8000/serials/episode/${episodeToDelete}`,{method: 'DELETE'});
@@ -51,7 +80,7 @@ export default {
       }catch (e){
         alert(e)
       }
-      await this.resetData();
+      await this.$router.push('/');
     },
     async resetData(){
       const res = await fetch(`http://localhost:8000/serials/${this.$route.params.id}`,{method: 'GET'});
@@ -107,14 +136,20 @@ export default {
   <div class="card col-12 bg-dark">
     <div class="row">
 
-      <div class="col-4">
-        <img :src="serial.Image" class="card-img rounded mx-auto d-block img-fluid col-5 float-start">
+      <div class="col-4 text-center">
+        <img v-if="editSerial==false" :src="serial.Image" class="card-img rounded mx-auto d-block img-fluid col-5 float-start">
+        <input v-if="editSerial==true" v-model="serialPatch.Image" type="text" class="form-control" :placeholder="serial.Image"/>
+        <button v-if="editSerial==true" type="button" class="input-group-text btn btn-light text-dark" v-on:click="editSerial=false">Zrušit</button>
+
       </div>
       <div class="col-8">
 
-        <div class="card-title text-light">
-          <h3>{{serial.IdSerial}}. {{ serial.NameSerial }}</h3>
+        <div class="card-title text-light col-3">
+          <h3 v-if="editSerial==false">{{serial.IdSerial}}. {{ serial.NameSerial }}</h3>
+          <input v-if="editSerial==true" v-model="serialPatch.NameSerial" type="text" class="form-control" :placeholder="serial.NameSerial"/>
+          <button v-if="editSerial==true" type="button" class="input-group-text btn btn-light text-dark" @click="patchSerial(serial.IdSerial)"> Odeslat</button>
           <button type="button" class="input-group-text btn btn-light text-dark " @click="deleteSerial(serial.IdSerial)"><i class="bi bi-trash"></i></button>
+          <button v-if="editSerial==false" type="button" class="input-group-text btn btn-light text-dark " v-on:click="editSerial=true"><i class="bi bi-pencil"></i></button>
         </div>
 
 
@@ -134,9 +169,8 @@ export default {
             </div>
             <select class="form-select" aria-label="Default select example" v-model="usedSerie">
               <option v-for="serie in serial.seasons" :value="serie"> {{ serie.NameSeason }} </option>
-
             </select>
-            <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-pencil"></i></button>
+            <!--<button type="button" class="input-group-text btn btn-light text-dark " v-on:click="newSeason=true"><i class="bi bi-pencil"></i></button> -->
             <button type="button" class="input-group-text btn btn-light text-dark " @click="deleteSeason(usedSerie.IdSeason)"><i class="bi bi-trash"></i></button>
           </div>
 
@@ -144,7 +178,7 @@ export default {
             <template v-for="serie in serial.seasons">
               <div v-for="episodeX in serie.episodes">
                 <div v-if="episodeX.Season == usedSerie.IdSeason"  class="input-group">
-                <li class="list-group-item "> {{usedSerie.NumberSeason}}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
+                <li class="list-group-item col-11" > {{usedSerie.NumberSeason}}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
                   <button type="button" class="input-group-text btn btn-light text-dark " @click="deleteEpisode(episodeX.IdEpisode)"><i class="bi bi-trash"></i></button>
                 </div>
               </div>

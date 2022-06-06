@@ -40,7 +40,7 @@ export default {
               <ul class="list-group overflow-scroll " style="height: 20rem;">
               <template v-for="serie in series">
                 <div v-for="episodeX in serie.episodes">
-                  <li v-if="episodeX.Season == usedSerie.IdSeason" class="list-group-item "> {{ usedSerie.NumberSeason }}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
+                  <li v-if="episodeX.Season == usedSerie.IdSeason" class="list-group-item col-11"> {{ usedSerie.NumberSeason }}x{{ episodeX.NumberEpisode }} - {{ episodeX.NameEpisode }} </li>
 
                 </div>
               </template>
