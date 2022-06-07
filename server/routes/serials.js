@@ -24,9 +24,9 @@ router.get('/:id', (req, res, next) => {
 	const id = req.params.id
 	if (id) {
 		const serial = db.prepare('SELECT * FROM Serial WHERE IdSerial = ?').get(id);
-		serial.seasons = db.prepare(`SELECT * FROM Season WHERE Season.Serial = ${serial.IdSerial}`).all();
+		serial.seasons = db.prepare(`SELECT * FROM Season WHERE Season.Serial = ${serial.IdSerial} ORDER BY Season.NumberSeason`).all();
 		for(let season of serial.seasons){
-			season.episodes = db.prepare(`SELECT * FROM Episode WHERE Episode.Season = ${season.IdSeason}`).all();
+			season.episodes = db.prepare(`SELECT * FROM Episode WHERE Episode.Season = ${season.IdSeason} ORDER BY Episode.NumberEpisode`).all();
 		}
 		res.send(serial);
 	} else {
@@ -125,7 +125,9 @@ router.patch('/serial/:id', (req, res, next) => {
 		if(serial){
 			Object.assign(serial, body);
 			const stm = db.prepare('UPDATE Serial SET NameSerial = ?, Image =? WHERE Serial.IdSerial = ?');
+			console.debug(stm);
 			const info = stm.run(serial.NameSerial, serial.Image, serial.IdSerial);
+			console.debug(info);
 			res.sendStatus(200);
 		}
 		else{
@@ -136,35 +138,27 @@ router.patch('/serial/:id', (req, res, next) => {
 	}
 });
 
-/*
-router.patch("/:id", (req, res) => {
+router.patch('/episode/:id', (req, res, next) => {
 	const body = req.body;
-	const id = req.params.id;
+	const id = req.params.id
+	console.debug(req.params);
 	if (id) {
-		const article = db.prepare('SELECT * FROM article WHERE id = ?').get(id);
-		if (article) {
-			Object.assign(article, body);
-			const stm = db.prepare(
-				"UPDATE article SET image = ?, title = ?, date = ?, text = ? WHERE id = ?"
-			);
-			stm.run(article.image, article.title,article.date,article.text,parseInt(id));
-		} else {
-			res.sendStatus(404)
+		const episode = db.prepare('SELECT * FROM Episode WHERE Episode.IdEpisode = ?').get(id);
+		if(episode){
+			Object.assign(episode, body);
+			const stm = db.prepare('UPDATE Episode SET Season = ?, NumberEpisode =?, NameEpisode =? WHERE Episode.IdEpisode = ?');
+			console.debug(stm);
+			const info = stm.run(episode.Season, episode.NumberEpisode, episode.NameEpisode, episode.IdEpisode);
+			console.debug(info);
+			res.sendStatus(200);
 		}
-		res.send(article);
+		else{
+			res.sendStatus(404);
+		}
 	} else {
 		res.sendStatus(404);
 	}
 });
-router.delete("/:id", (req, res) => {
-	const id = req.params.id;
-	if (id) {
-		db.prepare("DELETE FROM article WHERE id = ?").run(id)
-		res.sendStatus(200);
-	} else {
-		res.sendStatus(404);
-	}
-})
-*/
+
 
 module.exports = router;
