@@ -160,5 +160,28 @@ router.patch('/episode/:id', (req, res, next) => {
 	}
 });
 
+router.patch('/season/:id', (req, res, next) => {
+	const body = req.body;
+	const id = req.params.id
+	console.debug(req.params);
+	if (id) {
+		const season = db.prepare('SELECT * FROM Season WHERE Season.IdSeason = ?').get(id);
+		if(season){
+			Object.assign(season, body);
+			const stm = db.prepare('UPDATE Season SET NameSeason = ?, Serial =?, NumberSeason =? WHERE Season.IdSeason = ?');
+			console.debug(stm);
+			const info = stm.run(season.NameSeason, season.Serial, season.NumberSeason, season.IdSeason);
+			console.debug(info);
+			res.sendStatus(200);
+		}
+		else{
+			res.sendStatus(404);
+		}
+	} else {
+		res.sendStatus(404);
+	}
+});
+
+
 
 module.exports = router;

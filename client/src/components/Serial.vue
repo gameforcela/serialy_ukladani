@@ -19,6 +19,11 @@ export default {
         NumberEpisode: null,
         NameEpisode: null
       },
+      seasonPatch:{
+        NameSeason: null,
+        Serial: null,
+        NumberSeason: null
+      },
       season:{
         NameSeason: null,
         Serial: null,
@@ -58,6 +63,32 @@ export default {
         alert(e)
       }
       this.editSerial=false;
+      await this.resetData();
+    },
+    async patchSeason(seasonToPatch){
+      console.log(seasonToPatch);
+      try{
+        if(this.seasonPatch.NameSeason == null){
+          this.seasonPatch.NameSeason = seasonToPatch.NameSeason;
+        }
+        if(this.seasonPatch.NumberSeason == null){
+          this.seasonPatch.NumberSeason = seasonToPatch.NumberSeason;
+        }
+        this.seasonPatch.Serial = seasonToPatch.Serial;
+        console.log(this.seasonPatch);
+        const res = await fetch(`http://localhost:8000/serials/season/${seasonToPatch.IdSeason}`,
+            {method: 'PATCH',
+              body: JSON.stringify(this.seasonPatch),
+              headers:{
+                'Content-type':'application/json'
+              }
+            });
+        console.log(res);
+        alert("Edited!")
+      }catch (e){
+        alert(e)
+      }
+      this.editSeason=false;
       await this.resetData();
     },
     async patchEpisode(episodeToPatch){
@@ -207,8 +238,16 @@ export default {
             <select class="form-select" aria-label="Default select example" v-model="usedSerie">
               <option v-for="serie in serial.seasons" :value="serie"> {{ serie.NameSeason }} </option>
             </select>
-            <button type="button" class="input-group-text btn btn-light text-dark " v-on:click="editSeason=true"><i class="bi bi-pencil"></i></button>
-            <button type="button" class="input-group-text btn btn-light text-dark " @click="deleteSeason(usedSerie.IdSeason)"><i class="bi bi-trash"></i></button>
+            <!--PATCH SERIE FORM-->
+            <div v-if="editSeason==true" class="row">
+              <label class="form-label col-2 text-center text-light" >Upravit serii: </label>
+              <input type="text" v-model="seasonPatch.NameSeason" class="col-3" :placeholder=usedSerie.NameSeason />
+              <input type="number" v-model="seasonPatch.NumberSeason" class="col-1" :placeholder=usedSerie.NumberSeason />
+              <button class="col-1 btn btn-dark" @click="patchSeason(usedSerie)" v-on:click="newSeason=false"><i class="bi bi-check text-success btn-lg"></i></button>
+              <button v-on:click="editSeason=false" class="col-1 btn btn-dark text-light"><i class="bi bi-x text-danger btn-lg"></i></button>
+            </div>
+            <button v-if="editSeason==false" type="button" class="input-group-text btn btn-light text-dark " v-on:click="editSeason=true"><i class="bi bi-pencil"></i></button>
+            <button v-if="editSeason==false" type="button" class="input-group-text btn btn-light text-dark " @click="deleteSeason(usedSerie.IdSeason)"><i class="bi bi-trash"></i></button>
           </div>
           <!--EPISODY -->
           <ul class="list-group overflow-scroll " style="height: 20rem;">
@@ -226,7 +265,7 @@ export default {
                   <div v-if="editEpisode==true && editEpisodeNumber==episodeX.IdEpisode" class="row">
                     <input type="text" v-model="episodePatch.NameEpisode" class="col-3" :placeholder=episodeX.NameEpisode />
                     <input type="number" v-model="episodePatch.NumberEpisode" class="col-1" :placeholder=episodeX.NumberEpisode />
-                    <button class="col-1 btn btn-dark" @click="patchEpisode(episodeX)" v-on:click="episodePatch=false"><i class="bi bi-check text-success btn-lg"></i></button>
+                    <button class="col-1 btn btn-dark" @click="patchEpisode(episodeX)" v-on:click="editEpisode=false"><i class="bi bi-check text-success btn-lg"></i></button>
                     <button class="col-1 btn btn-dark" v-on:click="editEpisode=false"><i class="bi bi-x text-danger btn-lg"></i></button>
                   </div>
                 </div>
